@@ -47,6 +47,7 @@ static NSString * const kHardwareL2CacheSizeKey =          @"hw.l2cachesize";
 @property (assign, atomic, readwrite) CGSize             screenResolution;
 @property (assign, atomic, readwrite) NSUInteger         majorOSVersion;
 @property (assign, atomic, readwrite) NSUInteger         minorOSVersion;
+@property (assign, atomic, readwrite) NSUInteger         subminorOSVersion;
 @property (assign, atomic, readwrite) BOOL               isMacAppStoreAvailable;
 @property (assign, atomic, readwrite) BOOL               isIAPAvailable;
 
@@ -55,7 +56,7 @@ static NSString * const kHardwareL2CacheSizeKey =          @"hw.l2cachesize";
 @implementation GBDeviceDetails
 
 -(NSString *)description {
-    return [NSString stringWithFormat:@"%@\nrawSystemInfoString: %@\nnodeName: %@\nfamily: %d\nmajorModelNumber: %ld\nminorModelNumber: %ld\npysicalMemory: %.3f\ncpuFrequency: %.3f\nnumberOfCores: %ld\nl2CacheSize: %.3f\nbyteOrder: %d\nscreenResolution: %.0fx%.0f\nmajorOSVersion: %ld\nminorOSVersion: %ld", [super description], self.rawSystemInfoString, self.nodeName, self.family, (unsigned long)self.majorModelNumber, (unsigned long)self.minorModelNumber, self.physicalMemory, self.cpuFrequency, (unsigned long)self.numberOfCores, self.l2CacheSize, self.byteOrder, self.screenResolution.width, self.screenResolution.height, (unsigned long)self.majorOSVersion, (unsigned long)self.minorOSVersion];
+    return [NSString stringWithFormat:@"%@\nrawSystemInfoString: %@\nnodeName: %@\nfamily: %d\nmajorModelNumber: %ld\nminorModelNumber: %ld\npysicalMemory: %.3f\ncpuFrequency: %.3f\nnumberOfCores: %ld\nl2CacheSize: %.3f\nbyteOrder: %d\nscreenResolution: %.0fx%.0f\nmajorOSVersion: %ld\nminorOSVersion: %ld\nsubminorOSVersion: %ld", [super description], self.rawSystemInfoString, self.nodeName, self.family, (unsigned long)self.majorModelNumber, (unsigned long)self.minorModelNumber, self.physicalMemory, self.cpuFrequency, (unsigned long)self.numberOfCores, self.l2CacheSize, self.byteOrder, self.screenResolution.width, self.screenResolution.height, (unsigned long)self.majorOSVersion, (unsigned long)self.minorOSVersion, (unsigned long)self.subminorOSVersion];
 }
 
 @end
@@ -145,6 +146,17 @@ static NSString * const kHardwareL2CacheSizeKey =          @"hw.l2cachesize";
     return minorOSVersionInteger;
 }
 
++(NSUInteger)subminorOSVersion {
+    NSString *systemVersion = [NSDictionary dictionaryWithContentsOfFile:@"/System/Library/CoreServices/SystemVersion.plist"][@"ProductUserVisibleVersion"];
+    NSArray *components = [systemVersion componentsSeparatedByString:@"."];
+    if(components.count >= 3){
+        NSString *subminorSystemVersion = components[2];
+        NSUInteger subminorOSVersionInteger = [subminorSystemVersion integerValue];
+        return subminorOSVersionInteger;
+    }
+    return 0;
+}
+
 +(CGSize)screenResolution {
     return [NSScreen mainScreen].frame.size;
 }
@@ -224,6 +236,7 @@ static NSString * const kHardwareL2CacheSizeKey =          @"hw.l2cachesize";
     deviceDetails.byteOrder = [self byteOrder];
     deviceDetails.majorOSVersion = [self majorOSVersion];
     deviceDetails.minorOSVersion = [self minorOSVersion];
+    deviceDetails.subminorOSVersion = [self subminorOSVersion];
     deviceDetails.nodeName = [self nodeName];
     deviceDetails.screenResolution = [self screenResolution];
     deviceDetails.family = [self family];
